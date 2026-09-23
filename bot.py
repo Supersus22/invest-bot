@@ -17,7 +17,7 @@ from flask import Flask
 logging.basicConfig(level=logging.INFO)
 
 # ===== КОНФИГ =====
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8917861763:AAFU89ypwNWkDHXJ489WjiEPa3eglSAWaPU")
+BOT_TOKEN = os.environ.get(BOT_TOKEN = os.environ.get("BOT_TOKEN", "8917861763:AAFU89ypwNWkDHXJ489WjiEPa3eglSAWaPU"))
 ADMIN_IDS = [7643451177]
 OWNER_USERNAME = "Администратор"
 SITE_URL = os.environ.get("SITE_URL", "https://mepon.pythonanywhere.com")
