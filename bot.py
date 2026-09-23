@@ -98,7 +98,7 @@ def init_db():
 init_db()
 
 
-# ===== ФУНКЦИИ КОНФИГА =====
+# ===== КОНФИГ =====
 def get_config(key):
     conn = sqlite3.connect('investments.db')
     c = conn.cursor()
@@ -141,7 +141,7 @@ def get_stock_percent(user_id, stock_type):
     return round(((cur - base) / base) * 100, 1)
 
 
-# ===== ФУНКЦИИ ПОЛЬЗОВАТЕЛЕЙ =====
+# ===== ПОЛЬЗОВАТЕЛИ =====
 def get_user(user_id):
     conn = sqlite3.connect('investments.db')
     c = conn.cursor()
@@ -184,7 +184,7 @@ def get_user_stocks(user_id, table):
     return r
 
 
-# ===== ОСНОВНЫЕ ОПЕРАЦИИ =====
+# ===== ОПЕРАЦИИ =====
 def deposit_balance(user_id, amount):
     conn = sqlite3.connect('investments.db')
     c = conn.cursor()
@@ -418,14 +418,12 @@ def get_consent_text():
 """
 
 
-# ===== ХЕНДЛЕРЫ =====
-
+# ===== /start =====
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, command: CommandObject, state: FSMContext):
     user_id = message.from_user.id
     args = command.args or ""
 
-    # Если пришёл с сайта — сохраняем код и просим номер
     if args.startswith("reg_"):
         await state.update_data(reg_code=args)
         await message.answer(
@@ -458,7 +456,6 @@ async def process_contact(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     phone = contact.phone_number
 
-    # Если уже зарегистрирован
     existing = get_user(user_id)
     if not existing:
         existing_phone = get_user_by_phone(phone)
@@ -471,7 +468,6 @@ async def process_contact(message: types.Message, state: FSMContext):
     else:
         await message.answer("✅ Вы уже зарегистрированы.", reply_markup=main_keyboard())
 
-    # Если пришли с сайта — отправляем данные на сайт
     data = await state.get_data()
     reg_code = data.get("reg_code")
     if reg_code:
@@ -579,7 +575,7 @@ async def show_portfolio(message: types.Message):
     await message.answer(txt, parse_mode="Markdown")
 
 
-# ===== ПОКУПКА =====
+# ===== КУПИТЬ =====
 @dp.message(F.text == "🛒 Купить акции")
 async def buy_menu(message: types.Message):
     user_id = message.from_user.id
@@ -767,14 +763,17 @@ async def price_select(callback: types.CallbackQuery, state: FSMContext):
 async def change_price(message: types.Message, state: FSMContext):
     try:
         v = int(message.text.strip())
-        if v < 0: raise ValueError
+        if v < 0:
+            raise ValueError
     except:
         await message.answer("❌ Введите число")
         return
     data = await state.get_data()
     pt = data.get("price_type")
-    if pt == "eqn_base": set_config("eqn_base_price", v)
-    elif pt == "ane4k_base": set_config("ane4k_base_price", v)
+    if pt == "eqn_base":
+        set_config("eqn_base_price", v)
+    elif pt == "ane4k_base":
+        set_config("ane4k_base_price", v)
     await message.answer(f"✅ Изменено на {v}")
     await state.clear()
 
@@ -820,7 +819,8 @@ async def adm_mailing(message: types.Message, state: FSMContext):
         try:
             await bot.send_message(u[0], f"📢 {message.text}")
             sent += 1
-        except: pass
+        except:
+            pass
         await asyncio.sleep(0.05)
     await message.answer(f"✅ Отправлено: {sent}")
     await state.clear()
@@ -841,9 +841,9 @@ async def adm_reply(message: types.Message, state: FSMContext):
 # ===== ЗАПУСК =====
 async def main():
     print("🚀 Бот запущен!")
-    threading.Thread(target=run_web, daemon=True).start()
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    threading.Thread(target=run_web, daemon=True).start()  # Flask СНАЧАЛА
+    asyncio.run(main())                                     # потом бот
